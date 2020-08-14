@@ -1,7 +1,6 @@
-const store = {
-  items: [],
-  hideCheckedItems: false
-};
+import store from './store.js';
+import item from './item.js';
+
 
 const generateItemElement = function (item) {
   let itemTitle = `<span class="shopping-item shopping-item__checked">${item.name}</span>`;
@@ -29,6 +28,7 @@ const generateItemElement = function (item) {
 
 const generateShoppingItemsString = function (shoppingList) {
   const items = shoppingList.map((item) => generateItemElement(item));
+ /* store.findAndToggleChecked(id); */
   return items.join('');
 };
 
@@ -44,9 +44,18 @@ const render = function () {
   $('.js-shopping-list').html(shoppingListItemsString);
 };
 
-const addItemToShoppingList = function (itemName) {
-  store.items.push({ id: cuid(), name: itemName, checked: false });
+const addItemToShoppingList = function(itemName) {
+  try {
+    item.validateName(name);
+    // create a new item if name is valid
+    store.items.push(item.create(name));
+    render();
+  } catch(error) {
+    console.log(`Cannot add item: ${error.message}`);
+  }
 };
+  
+
 
 const handleNewItemSubmit = function () {
   $('#js-shopping-list-form').submit(function (event) {
@@ -58,10 +67,10 @@ const handleNewItemSubmit = function () {
   });
 };
 
-const toggleCheckedForListItem = function (id) {
+/*const toggleCheckedForListItem = function (id) {
   const foundItem = store.items.find(item => item.id === id);
   foundItem.checked = !foundItem.checked;
-};
+}; */
 
 const handleItemCheckClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
@@ -81,10 +90,10 @@ const getItemIdFromElement = function (item) {
  * Responsible for deleting a list item.
  * @param {string} id 
  */
-const deleteListItem = function (id) {
+/**const deleteListItem = function (id) {
   const index = store.items.findIndex(item => item.id === id);
   store.items.splice(index, 1);
-};
+}; */
 
 const handleDeleteItemClicked = function () {
   // like in `handleItemCheckClicked`, we use event delegation
@@ -126,6 +135,7 @@ const handleEditShoppingItemSubmit = function () {
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
     const itemName = $(event.currentTarget).find('.shopping-item').val();
+    store.findAndUpdateName(id, itemName);
     editListItemName(id, itemName);
     render();
   });
@@ -144,3 +154,4 @@ export default {
   render,
   bindEventListeners
 };
+
